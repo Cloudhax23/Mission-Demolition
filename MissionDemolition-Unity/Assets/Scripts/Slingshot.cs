@@ -17,7 +17,7 @@ public class Slingshot : MonoBehaviour
     public GameObject launchPoint;
     public GameObject projectile;
     private Vector3 startingPoint;
-
+    public float velocityMult = 8f;
 
     private void Awake()
     {
@@ -34,11 +34,13 @@ public class Slingshot : MonoBehaviour
             projectile.GetComponent<Rigidbody>().isKinematic = true;
         }
         Vector3 desiredDelta = mousePos3D - launchPoint.transform.position;
-        if (Mathf.Abs(desiredDelta.x) > 5)
+        if (desiredDelta.magnitude > GetComponent<SphereCollider>().radius)
         {
             desiredDelta.Normalize();
+            desiredDelta *= GetComponent<SphereCollider>().radius;
         }
-        projectile.transform.position = desiredDelta;
+        projectile.transform.position = launchPoint.transform.position + desiredDelta;
+        projectile.GetComponent<Rigidbody>().velocity = -desiredDelta * velocityMult;
         launchPoint.SetActive(true);
     }
     private void OnMouseUp()
@@ -47,6 +49,7 @@ public class Slingshot : MonoBehaviour
         launchPoint.SetActive(false);
         startingPoint = Vector3.zero;
         projectile.GetComponent<Rigidbody>().isKinematic = false;
+        FollowCam.objectToFollow = projectile;
     }
     void Start()
     {
