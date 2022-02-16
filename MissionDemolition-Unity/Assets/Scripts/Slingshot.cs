@@ -16,7 +16,7 @@ public class Slingshot : MonoBehaviour
 {
     public GameObject launchPoint;
     public GameObject projectile;
-    private Vector3 startingPoint;
+    public Vector3 startingPoint;
     public float velocityMult = 8f;
 
     private void Awake()
