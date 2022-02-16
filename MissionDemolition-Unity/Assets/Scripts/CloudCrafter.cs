@@ -5,7 +5,7 @@
  * Last Edited by: Qadeem Qureshi
  * Last Edited: Feb 16, 2022
  * 
- * Description: Controls the Slingshot 
+ * Description: Controls the Clouds spawning 
  */
 
 using System.Collections;
