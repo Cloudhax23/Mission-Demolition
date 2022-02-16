@@ -1,3 +1,13 @@
+/*
+ * Created by: Qadeem Qureshi
+ * Date Created: 2/16/2022
+ * 
+ * Last Edited by: Qadeem Qureshi
+ * Last Edited: Feb 16, 2022
+ * 
+ * Description: Controls the Slingshot 
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
