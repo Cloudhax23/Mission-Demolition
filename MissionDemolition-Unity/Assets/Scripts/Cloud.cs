@@ -39,7 +39,22 @@ public class Cloud : MonoBehaviour
 
             Vector3 offset = Random.insideUnitSphere;
 
-            offset = Vector3.Cross(offset, sphereOffsetScale);
+            offset.x *= sphereOffsetScale.x;
+            offset.y *= sphereOffsetScale.y;
+            offset.z *= sphereOffsetScale.z;
+            spTransform.localPosition =  offset;
+            
+            Vector3 scale = Vector3.one;
+            scale.x = Random.Range(sphereScaleRangeX.x,
+            sphereScaleRangeX.y);
+            scale.y = Random.Range(sphereScaleRangeY.x,
+            sphereScaleRangeY.y);
+            scale.z = Random.Range(sphereScaleRangeZ.x,
+            sphereScaleRangeZ.y);
+
+            scale.y *= 1 - (Mathf.Abs(offset.x) / sphereOffsetScale.x);
+            scale.y = Mathf.Max(scale.y, scaleYMin);
+            spTransform.localScale = scale;
 
         }
     }
@@ -47,6 +62,6 @@ public class Cloud : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
