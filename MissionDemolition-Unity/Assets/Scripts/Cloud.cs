@@ -5,7 +5,7 @@
  * Last Edited by: Qadeem Qureshi
  * Last Edited: Feb 14, 2022
  * 
- * Description: Controls the Slingshot 
+ * Description: Controls the Cloud design 
  */
 
 using System.Collections;
