@@ -1,46 +1,120 @@
+/*
+ * Created by: Qadeem Qureshi
+ * Date Created: 2/18/2022
+ * 
+ * Last Edited by: Qadeem Qureshi
+ * Last Edited: Feb 18, 2022
+ * 
+ * Description: Projectile line tracer
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectileLine : MonoBehaviour
 {
-    public static ProjectileLine S;
-    public float minDist = .1f;
-    private LineRenderer line;
-    private GameObject _poi;
-    private List<Vector3> points;
+   public static ProjectileLine S;
 
-    private void Awake()
-    {
-        S = this;
-        line = GetComponent<LineRenderer>();
-        line.enabled = false;
-        points = new List<Vector3>();
-    }
+   [Header("Set in Inspector")]
+   public float minDistance = 0.1f;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+   private LineRenderer line;
+   private GameObject _poi;
+   private List<Vector3> points;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+   private void Awake()
+   {
+      S = this;
+      line = GetComponent<LineRenderer>(); 
+      line.enabled = false;
+      points = new List<Vector3>();
+   }
 
-    public GameObject poi
-    {
-        get { return (_poi);  }
-        set
-        {
-            _poi = value;
-            if (poi)
+   public GameObject poi
+   {
+      get { return _poi; }
+      set
+      {
+         _poi = value;
+         if (_poi != null)
+         {
+            line.enabled = false;
+            points = new List<Vector3>();
+            AddPoint();
+         }
+      }
+   }
+
+   public void Clear()
+   {
+      _poi = null;
+      line.enabled = false;
+      points = new List<Vector3>();
+   }
+
+   public void AddPoint()
+   {
+      Vector3 pt = _poi.transform.position;
+      if (points.Count > 0 && (pt - lastPoint).magnitude < minDistance) return; 
+      if (points.Count == 0)
+      { //if initial point
+         Vector3 launchPosDiff = pt - Slingshot.LAUNCH_POS;
+         points.Add(pt + launchPosDiff); 
+         points.Add(pt);
+         line.SetPosition(0, points[0]);
+         line.SetPosition(1, points[1]);
+         line.enabled = true;
+      }
+      else
+      {
+         points.Add(pt);
+         line.positionCount = points.Count;
+         line.SetPosition(points.Count - 1, lastPoint);
+         line.enabled = true;
+      }
+   }
+
+   public Vector3 lastPoint
+   {
+      get
+      {
+         if (points == null)
+         {
+
+            return (Vector3.zero);
+         }
+         return (points[points.Count - 1]);
+      }
+   }
+
+   void FixedUpdate()
+   {
+      if (poi == null)
+      {
+
+         if (FollowCam.POI != null)
+         {
+            if (FollowCam.POI.tag == "Projectile")
             {
-                line.enabled = false;
-                // points.AddRange();
+               poi = FollowCam.POI;
             }
-        }
-    }
+            else
+            {
+               return; 
+            }
+         }
+         else
+         {
+            return; 
+         }
+      }
+
+      AddPoint();
+      if (FollowCam.POI == null)
+      {
+         poi = null;
+      }
+   }
+
 }

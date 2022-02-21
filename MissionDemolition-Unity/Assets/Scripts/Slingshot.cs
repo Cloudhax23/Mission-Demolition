@@ -1,12 +1,13 @@
 /*
  * Created by: Qadeem Qureshi
- * Date Created: 2/09/2022
+ * Date Created: 2/9/2022
  * 
  * Last Edited by: Qadeem Qureshi
- * Last Edited: Feb 09, 2022
+ * Last Edited: Feb 9, 2022
  * 
- * Description: Controls the Slingshot 
+ * Description: Main slingshot behavior
  */
+
 
 using System.Collections;
 using System.Collections.Generic;
@@ -14,51 +15,83 @@ using UnityEngine;
 
 public class Slingshot : MonoBehaviour
 {
+    [Header("Drop Prefab Here")]
+    public GameObject projPrefab;
+    [Header("Change Values Around")]
+    public float velocityMultiplier = 10f;
+
+    [Header("Don't Touch")]
+    static private Slingshot S;  
     public GameObject launchPoint;
     public GameObject projectile;
-    public Vector3 startingPoint;
-    public float velocityMult = 8f;
+    public Vector3 launchPos;
+    public bool aimingMode;
+    public Rigidbody projRB;
+
+    static public Vector3 LAUNCH_POS {                                       
+            get {
+                if (S == null ) return Vector3.zero;
+                return S.launchPos;
+            }
+        }
 
     private void Awake()
     {
+        S = this;    
+        Transform launchPointTrans = transform.Find("LaunchPoint");
+        launchPoint = launchPointTrans.gameObject; 
         launchPoint.SetActive(false);
+        launchPos = launchPointTrans.position;
     }
 
-    private void OnMouseDrag()
+    private void Update()
     {
-        Vector3 mousePos3D = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
-        if (startingPoint == Vector3.zero)
+        if (!aimingMode) return; 
+
+        Vector3 mousePos2D = Input.mousePosition;
+        mousePos2D.z = -Camera.main.transform.position.z; 
+        Vector3 mousePos3D = Camera.main.ScreenToWorldPoint(mousePos2D);
+
+        Vector3 mouseDelta = mousePos3D - launchPos;
+
+
+        float maxMagnitude = this.GetComponent<SphereCollider>().radius;
+        if(mouseDelta.magnitude > maxMagnitude) 
         {
-            startingPoint = Camera.main.ScreenToWorldPoint(mousePos3D);
-            projectile = Instantiate(projectile);
-            projectile.GetComponent<Rigidbody>().isKinematic = true;
+            mouseDelta.Normalize();
+            mouseDelta *= maxMagnitude;
         }
-        Vector3 desiredDelta = mousePos3D - launchPoint.transform.position;
-        if (desiredDelta.magnitude > GetComponent<SphereCollider>().radius)
+
+        projectile.transform.position = launchPos + mouseDelta;
+
+        if (Input.GetMouseButtonUp(0)) 
         {
-            desiredDelta.Normalize();
-            desiredDelta *= GetComponent<SphereCollider>().radius;
+            aimingMode = false;
+            projRB.isKinematic = false;
+            projRB.velocity = -mouseDelta * velocityMultiplier; 
+            FollowCam.POI = projectile;
+            projectile = null;
+            MissionDemolition.ShotFired();
+            ProjectileLine.S.poi = projectile;
         }
-        projectile.transform.position = launchPoint.transform.position + desiredDelta;
-        projectile.GetComponent<Rigidbody>().velocity = -desiredDelta * velocityMult;
+    }
+    private void OnMouseEnter()
+    {
         launchPoint.SetActive(true);
     }
-    private void OnMouseUp()
+
+    private void OnMouseExit()
     {
-        Vector3 mousePos3D = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
         launchPoint.SetActive(false);
-        startingPoint = Vector3.zero;
-        projectile.GetComponent<Rigidbody>().isKinematic = false;
-        FollowCam.objectToFollow = projectile;
-    }
-    void Start()
-    {
-        
     }
 
-    // Update is called once per frame
-    void Update()
-    { 
-    
+    private void OnMouseDown()
+    {
+        aimingMode = true;
+        projectile = Instantiate(projPrefab);
+        projectile.transform.position = launchPos;
+
+        projRB = projectile.GetComponent<Rigidbody>(); 
+        projRB.isKinematic = true;
     }
 }
